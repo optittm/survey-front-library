@@ -33,12 +33,12 @@ class Network {
     sendUserFeedback(rating, comment = '') {
         var data = {
             rating: rating,
-            description: comment,
-            featureUrl: this.featureUrl
+            comment: comment,
+            feature_url: this.featureUrl
         };
         console.log(comment)
         console.log(data.description)
-        axios.post(this.url + '/comment', data, {
+        axios.post(this.url + '/comments', data, {
             withCredentials: true,
             headers: {
                 'Access-Control-Allow-Origin': '*',
