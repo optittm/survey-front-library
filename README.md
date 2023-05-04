@@ -31,6 +31,11 @@ In order to use the library, you juste need to import it in the way describe bel
 ```
 import Network from 'ottm-connector-feedback';
 ```
+
+**WARNING**  
+This library is using [FingerprintJS](https://github.com/fingerprintjs/fingerprintjs) to generate a user ID. You should be aware of your compliance with laws such as GDPR regarding the collection and treatment of user data.  
+If you are using this library with our [API](https://github.com/optittm/survey-back-api), the fingerprint usage can be disabled in the API configuration.
+
 ## Contribute
 
 The tool is released under a MIT licence. Contributors are welcomed.
