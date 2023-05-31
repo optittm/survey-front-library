@@ -17,52 +17,51 @@ class Network {
      * @param {function} requestPromise Function returning a promise which executes the request
      * @returns the request's result
      */
-    #sendRequestWithOAuth(requestPromise, ...args) {
-        return new Promise((resolve, reject) => {
-            let retried = false;
-            
-            const executePromise = async () => {
-                requestPromise(...args)
-                .then(resolve)
-                .catch(async (error) => {
-                    if (!retried && error.response.status == 401) {
-                        try {
-                            const authResponse = await axios.post(this.url + '/authorize', {
-                                withCredentials: true,
-                                headers: {
-                                    'Access-Control-Allow-Origin': '*',
-                                    'Content-Type': 'application/json'
-                                },
-                            });
-                            const tokenResponse = await axios.post(this.url + '/token', {
-                                grant_type: 'authorization_code',
-                                code: authResponse.data.code
+    async #sendRequestWithOAuth(requestFn, ...args) {
+        let retried = false;
+        
+        const executeRequest = async () => {
+            try {
+                const response = await requestFn(...args);
+                return response;
+            } catch(error) {
+                if (!retried && error.response.status == 401) {
+                    try {
+                        const authResponse = await axios.post(this.url + '/authorize', {
+                            withCredentials: true,
+                            headers: {
+                                'Access-Control-Allow-Origin': '*',
+                                'Content-Type': 'application/json'
                             },
-                            {
-                                withCredentials: false,
-                                headers: {
-                                    'Access-Control-Allow-Origin': '*',
-                                    'Content-Type': 'application/json'
-                                },
-                            })
-                            this.accessToken = tokenResponse.data.access_token;
-                            retried = true;
-                            executePromise();
-                        } catch(error) {
-                            reject(error);
-                        }
-                    } else {
-                        reject(error);
+                        });
+                        const tokenResponse = await axios.post(this.url + '/token', {
+                            grant_type: 'authorization_code',
+                            code: authResponse.data.code
+                        },
+                        {
+                            withCredentials: false,
+                            headers: {
+                                'Access-Control-Allow-Origin': '*',
+                                'Content-Type': 'application/json'
+                            },
+                        })
+                        this.accessToken = tokenResponse.data.access_token;
+                        retried = true;
+                        return executeRequest();
+                    } catch(error) {
+                        throw error;
                     }
-                });
+                } else {
+                    throw error;
+                }
             }
-            executePromise();
-        })
+        };
+        return executeRequest();
     }
 
-    #checkDisplayPromise() {
-        return new Promise((resolve, reject) => {
-            axios.get(this.url + '/rules', {
+    async #checkDisplayPromise() {
+        try {
+            const result = axios.get(this.url + '/rules', {
                 withCredentials: true,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
@@ -72,16 +71,15 @@ class Network {
                 params: {
                     featureUrl: this.featureUrl
                 },
-            }).then(result => {
-                resolve(result);
-            }).catch(error => {
-                reject(error);
             });
-        });
+            return result;
+        } catch (error) {
+            throw error;
+        }
     }
 
-    #postCommentPromise(rating, comment) {
-        return new Promise(async (resolve, reject) => {
+    async #postCommentPromise(rating, comment) {
+        try {
             // Get the visitor identifier from fingerprint
             const fp = await this.fpPromise;
             const result = await fp.get();
@@ -93,6 +91,7 @@ class Network {
                 feature_url: this.featureUrl,
                 user_id: user_fingerprint
             };
+
             axios.post(this.url + '/comments', data, {
                 withCredentials: true,
                 headers: {
@@ -100,41 +99,39 @@ class Network {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + this.accessToken
                 }
-            }).then(result => {
-                resolve(result);
-            }).catch(error => {
-                reject(error);
             });
-        });
+        } catch (error) {
+            throw error;
+        }
     }
 
     /**
      * 
-     * @returns {boolean} represents if the modal need to be displayed or not.
+     * @returns {boolean} represents if the modal needs to be displayed or not.
      */
     async initConfig() {
-        const request = this.#sendRequestWithOAuth(this.#checkDisplayPromise.bind(this));
-        return request.then((response) => {
-            return response.data;
-        }).catch(error => {
+        try {
+            const request = await this.#sendRequestWithOAuth(this.#checkDisplayPromise.bind(this));
+            console.log(request)
+            return request.data;
+        } catch (error) {
             console.log(error);
-        });
+            throw error;
+        }
     }
 
     /**
      * 
      * @param {number} rating evaluation of the feature for the user
      * @param {string} comment (optional) user's feedback
-     * @returns {boolean} if the request was successful or not
      */
     async sendUserFeedback(rating, comment = '') {
-        const request = this.#sendRequestWithOAuth(this.#postCommentPromise.bind(this), rating, comment);
-        return request.then(() => {
-            return true;
-        }).catch(error => {
+        try {
+            const request = await this.#sendRequestWithOAuth(this.#postCommentPromise.bind(this), rating, comment);
+        } catch (error) {
             console.log(error);
-            return false;
-        });
+            throw error;
+        }
     }
 }
 
