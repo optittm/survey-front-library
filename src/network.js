@@ -1,10 +1,13 @@
+import FingerprintJS from '@fingerprintjs/fingerprintjs'
 const axios = require('axios');
 
 
 class Network {
     constructor(featureUrl, apiUrl = 'http://localhost:8080') {
         this.url = apiUrl + '/api/v1';
-        this.featureUrl = featureUrl
+        this.featureUrl = featureUrl;
+        // Initialize fingerprint
+        this.fpPromise = FingerprintJS.load({monitoring: false});
     }
 
     /**
@@ -31,21 +34,32 @@ class Network {
      * @param {string} comment (optional) user's feedback
      */
     sendUserFeedback(rating, comment = '') {
-        var data = {
-            rating: rating,
-            comment: comment,
-            feature_url: this.featureUrl
-        };
-        console.log(comment)
-        console.log(data.description)
-        axios.post(this.url + '/comments', data, {
-            withCredentials: true,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Content-Type': 'application/json'
-            }
-        }).catch(error => {
-                console.log(error);
+        (async () => {
+            // Get the visitor identifier from fingerprint
+            const fp = await this.fpPromise;
+            const result = await fp.get();
+            console.log("DONE")
+            return result.visitorId;
+        })().then((visitorId) => {
+            const user_fingerprint = visitorId;
+        
+            console.log("FINGERPRINT")
+            console.log(user_fingerprint)
+            var data = {
+                rating: rating,
+                comment: comment,
+                feature_url: this.featureUrl,
+                user_id: user_fingerprint
+            };
+            axios.post(this.url + '/comments', data, {
+                withCredentials: true,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json'
+                }
+            }).catch(error => {
+                    console.log(error);
+            });
         });
     }
 }
