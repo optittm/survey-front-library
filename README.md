@@ -29,7 +29,7 @@ npm run test
 
 In order to use the library, you juste need to import it in the way describe below:
 ```
-import Network from 'ottm-connector-feedback';
+import Network from '@ottm/survey-front-library';
 ```
 
 **WARNING**  
