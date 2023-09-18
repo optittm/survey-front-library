@@ -1,16 +1,17 @@
 {
-  "name": "ottm-connector-feedback",
-  "version": "1.1.11",
-  "description": "",
+  "name": "@ottm/survey-front-library",
+  "version": "1.2.0",
+  "description": "Agnostic library used to get informations from a micro service ([survey-back-api](https://github.com/optittm/survey-back-api)) in order to determine if a modal can be shown or not. It is also used to send feedback information from the user's perspective.",
   "main": "index.js",
   "scripts": {
     "build": "babel src -d dist",
     "test": "jest"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Benjamin BALET",
+  "license": "MIT",
   "dependencies": {
+    "@fingerprintjs/fingerprintjs": "^3.4.1",
     "axios": "^0.26.0"
   },
   "devDependencies": {
@@ -19,5 +20,13 @@
     "@babel/plugin-transform-runtime": "^7.17.0",
     "@babel/preset-env": "^7.16.11",
     "jest": "^27.5.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/optittm/survey-front-library.git"
+  },
+  "bugs": {
+    "url": "https://github.com/optittm/survey-front-library/issues"
+  },
+  "homepage": "https://github.com/optittm/survey-front-library#readme"
 }
