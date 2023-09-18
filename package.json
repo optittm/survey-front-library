@@ -1,6 +1,6 @@
 {
   "name": "@ottm/survey-front-library",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Agnostic library used to get informations from a micro service ([survey-back-api](https://github.com/optittm/survey-back-api)) in order to determine if a modal can be shown or not. It is also used to send feedback information from the user's perspective.",
   "main": "index.js",
   "scripts": {
